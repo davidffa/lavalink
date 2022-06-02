@@ -95,7 +95,7 @@ class SocketContext internal constructor(
     }
 
   /**
-   * Gets or creates a voice connection
+   * Gets or creates a media connection
    */
   fun getMediaConnection(player: Player): MediaConnection {
     val guildId = player.guildId.toLong()
@@ -107,6 +107,11 @@ class SocketContext internal constructor(
 
     return conn
   }
+
+  /**
+   * Gets a media connection
+   */
+  fun getMediaConnection(guildId: String) = koe.getConnection(guildId.toLong())
 
   /**
    * Disposes of a voice connection

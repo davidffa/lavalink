@@ -27,6 +27,7 @@ import com.sedmelluq.discord.lavaplayer.track.TrackMarker
 import lavalink.server.player.TrackEndMarkerHandler
 import lavalink.server.player.filters.configs.Band
 import lavalink.server.player.filters.FilterChain
+import lavalink.server.recorder.AudioReceiver
 import lavalink.server.util.Util
 import moe.kyokobot.koe.VoiceServerInfo
 import org.json.JSONObject
@@ -168,5 +169,18 @@ class WebSocketHandlers {
     }
 
     context.send(payload)
+  }
+
+  fun record(context: SocketContext, json: JSONObject) {
+    val guildId = json.getString("guildId")
+
+    val conn = context.getMediaConnection(guildId) ?: return
+
+    if (conn.receiveHandler != null) {
+      (conn.receiveHandler as AudioReceiver).close()
+      conn.receiveHandler = null
+    } else {
+      conn.receiveHandler = AudioReceiver(guildId)
+    }
   }
 }

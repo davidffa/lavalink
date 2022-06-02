@@ -158,6 +158,7 @@ class SocketServer(
       "equalizer"         -> handlers.equalizer(context, json)
       "filters"           -> handlers.filters(context, json.getString("guildId"), message.payload)
       "ping"              -> handlers.pong(context, json)
+      "record"            -> handlers.record(context, json)
       else -> log.warn("Unexpected operation: " + json.getString("op"))
       // @formatter:on
     }
