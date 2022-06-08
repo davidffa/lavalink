@@ -1,6 +1,7 @@
 package lavalink.server.recorder
 
 import com.sedmelluq.discord.lavaplayer.natives.opus.OpusDecoder
+import lavalink.server.natives.mp3.Mp3Encoder
 import moe.kyokobot.koe.handler.AudioReceiveHandler
 import moe.kyokobot.koe.internal.util.AudioPacket
 import java.nio.ByteBuffer
@@ -15,22 +16,31 @@ import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
 class AudioReceiver(
-  private val guildId: String,
+  guildId: String,
+  bitrate: Int
 ) : AudioReceiveHandler {
   companion object {
-    const val BUFF_CAP = 960 * 2 * 2 // 2 channels with 960 samples each, in bytes
+    const val FRAME_SIZE = 960
+    const val BUFF_CAP = FRAME_SIZE * 2 * 2 // 2 channels with 960 samples each, in bytes
   }
+
+  private val mp3Encoder = Mp3Encoder(48000, 2, bitrate)
 
   // ssrc <-> list of 20ms pcm buffers
   private val audioQueue = ConcurrentHashMap<Long, ConcurrentLinkedQueue<ShortBuffer>>()
   private val opusDecoders = HashMap<Long, OpusDecoder>()
-  private val tempOpusBuffers = HashMap<Long, ByteBuffer>()
+
   private val mixerExecutor = Executors.newSingleThreadScheduledExecutor()
 
   // ------------ TEMP --------------
-  private val channel = FileChannel.open(Path("output.pcm"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+  private val channel = FileChannel.open(Path("output.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
 
-  private val mixedAudioFrame = ByteBuffer.allocate(BUFF_CAP)
+  private val opusBuf = ByteBuffer.allocateDirect(BUFF_CAP)
+    .order(ByteOrder.nativeOrder())
+  private val mixedAudioFrame = ByteBuffer.allocateDirect(BUFF_CAP)
+    .order(ByteOrder.nativeOrder())
+  private val mp3Buf = ByteBuffer.allocateDirect(BUFF_CAP)
+    .order(ByteOrder.nativeOrder())
 
   init {
     mixerExecutor.scheduleAtFixedRate({
@@ -61,7 +71,8 @@ class AudioReceiver(
       }
 
       mixedAudioFrame.flip()
-      channel.write(mixedAudioFrame)
+      mp3Encoder.encode(mixedAudioFrame.asShortBuffer(), FRAME_SIZE, mp3Buf)
+      channel.write(mp3Buf)
     }, 0, 20, TimeUnit.MILLISECONDS)
   }
 
@@ -71,12 +82,21 @@ class AudioReceiver(
     opusDecoders.values.forEach { it.close() }
     opusDecoders.clear()
     audioQueue.clear()
+
+    // 7200 bytes recommended on lame.h#L868
+    val finalMp3Frames = ByteBuffer.allocateDirect(7200)
+      .order(ByteOrder.nativeOrder())
+
+    mp3Encoder.flush(finalMp3Frames)
+    mp3Encoder.close()
+
+    channel.write(finalMp3Frames)
     channel.close()
   }
 
   override fun handleAudio(packet: AudioPacket) {
     val opus = packet.opusAudio
-    val opusBuf = getTempOpusBuf(packet.ssrc)
+    val opusBuf = opusBuf
       .clear()
       .put(opus)
       .flip()
@@ -89,12 +109,6 @@ class AudioReceiver(
     getDecoder(packet.ssrc).decode(opusBuf, pcmBuf)
     getAudioQueue(packet.ssrc).add(pcmBuf)
   }
-
-  private fun getTempOpusBuf(ssrc: Long) =
-    tempOpusBuffers.computeIfAbsent(ssrc) {
-      ByteBuffer.allocateDirect(BUFF_CAP)
-        .order(ByteOrder.nativeOrder())
-    }
 
   private fun getDecoder(ssrc: Long) =
     opusDecoders.computeIfAbsent(ssrc) {

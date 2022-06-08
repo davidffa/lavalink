@@ -175,12 +175,13 @@ class WebSocketHandlers {
     val guildId = json.getString("guildId")
 
     val conn = context.getMediaConnection(guildId) ?: return
+    val bitrate = if (json.has("bitrate")) json.getInt("bitrate") else 64000
 
     if (conn.receiveHandler != null) {
       (conn.receiveHandler as AudioReceiver).close()
       conn.receiveHandler = null
     } else {
-      conn.receiveHandler = AudioReceiver(guildId)
+      conn.receiveHandler = AudioReceiver(guildId, bitrate)
     }
   }
 }

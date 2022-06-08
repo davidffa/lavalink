@@ -1,0 +1,39 @@
+plugins {
+  id 'de.undercouch.download' version '5.1.0'
+}
+
+apply from: 'natives.gradle'
+
+ext.lameVersion = '3.100'
+
+task load { doLast {
+  if (!file("$projectDir/lame/lame-${lameVersion}").exists()) {
+    def downloadPath = "$buildDir/tmp/temp.tar.gz"
+    def unpackPath = "$projectDir/lame"
+
+    download.run {
+      src "https://sourceforge.net/projects/lame/files/lame/$lameVersion/lame-${lameVersion}.tar.gz/download"
+      dest downloadPath
+    }
+
+    copy {
+      from tarTree(file(downloadPath))
+      into unpackPath
+    }
+  }
+}}
+
+task compileNatives() { }
+task checkNatives() { }
+
+def buildTaskConfig = [
+        buildBase: buildDir,
+        projectBase: projectDir,
+        deployBase: project(':Lavalink-Server').projectDir,
+        setupDependency: tasks.load,
+        compileTask: tasks.compileNatives,
+        checkTask: tasks.checkNatives,
+        name: 'libmp3encoder'
+]
+
+createBuildTask(tasks, buildTaskConfig)
