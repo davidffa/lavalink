@@ -8,7 +8,10 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.ShortBuffer
 import java.nio.channels.FileChannel
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
@@ -24,42 +27,53 @@ class AudioReceiver(
     const val BUFF_CAP = FRAME_SIZE * 2 * 2 // 2 channels with 960 samples each, in bytes
   }
 
-  private val mp3Encoder = Mp3Encoder(48000, 2, bitrate)
-
   // ssrc <-> list of 20ms pcm buffers
-  private val audioQueue = ConcurrentHashMap<Long, ConcurrentLinkedQueue<ShortBuffer>>()
+  private val audioQueue = ConcurrentHashMap<Long, ConcurrentLinkedQueue<DecodedAudioPacket>>()
   private val opusDecoders = HashMap<Long, OpusDecoder>()
 
-  private val mixerExecutor = Executors.newSingleThreadScheduledExecutor()
-
-  // ------------ TEMP --------------
-  private val channel = FileChannel.open(Path("output.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+  private val mp3Encoder = Mp3Encoder(48000, 2, bitrate)
+  private val mixerExecutor = Executors.newSingleThreadScheduledExecutor {
+    val t = Thread(it, "$guildId - Mixer Thread")
+    t.isDaemon = true
+    t
+  }
 
   private val opusBuf = ByteBuffer.allocateDirect(BUFF_CAP)
     .order(ByteOrder.nativeOrder())
-  private val mixedAudioFrame = ByteBuffer.allocateDirect(BUFF_CAP)
-    .order(ByteOrder.nativeOrder())
   private val mp3Buf = ByteBuffer.allocateDirect(BUFF_CAP)
     .order(ByteOrder.nativeOrder())
+  private val mixedAudioFrame = ByteBuffer.allocateDirect(BUFF_CAP)
+    .order(ByteOrder.nativeOrder())
+
+  private val outputChannel: FileChannel
 
   init {
+    Files.createDirectories(Paths.get("./records"))
+    outputChannel = FileChannel.open(Path("./records/record-$guildId.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+
     mixerExecutor.scheduleAtFixedRate({
       mixedAudioFrame.clear()
 
-      if (audioQueue.size > 0) {
-        val currentFrames = audioQueue.map {
-          val currFrame = it.value.poll()
+      if (audioQueue.isNotEmpty()) {
+        val now = System.currentTimeMillis()
+        val currentFrames = LinkedList<DecodedAudioPacket>()
 
-          if (it.value.size == 0) audioQueue.remove(it.key)
+        audioQueue.forEach {
+          var currFrame = it.value.poll()
 
-          currFrame
+          while (currFrame != null && now - currFrame.receivedTimestamp > 100) {
+            currFrame = it.value.poll()
+          }
+
+          if (it.value.isEmpty()) audioQueue.remove(it.key)
+          if (currFrame != null) currentFrames.push(currFrame)
         }
 
         for (i in 0 until BUFF_CAP / 2) {
           var sample = 0
 
           currentFrames.forEach {
-            sample += it.get(i)
+            sample += it.data.get(i)
           }
 
           if (sample > Short.MAX_VALUE)
@@ -72,7 +86,7 @@ class AudioReceiver(
 
       mixedAudioFrame.flip()
       mp3Encoder.encode(mixedAudioFrame.asShortBuffer(), FRAME_SIZE, mp3Buf)
-      channel.write(mp3Buf)
+      outputChannel.write(mp3Buf)
     }, 0, 20, TimeUnit.MILLISECONDS)
   }
 
@@ -90,8 +104,8 @@ class AudioReceiver(
     mp3Encoder.flush(finalMp3Frames)
     mp3Encoder.close()
 
-    channel.write(finalMp3Frames)
-    channel.close()
+    outputChannel.write(finalMp3Frames)
+    outputChannel.close()
   }
 
   override fun handleAudio(packet: AudioPacket) {
@@ -107,7 +121,7 @@ class AudioReceiver(
       .asShortBuffer()
 
     getDecoder(packet.ssrc).decode(opusBuf, pcmBuf)
-    getAudioQueue(packet.ssrc).add(pcmBuf)
+    getAudioQueue(packet.ssrc).add(DecodedAudioPacket(pcmBuf, packet.receivedTimestamp))
   }
 
   private fun getDecoder(ssrc: Long) =
@@ -119,4 +133,9 @@ class AudioReceiver(
     audioQueue.computeIfAbsent(ssrc) {
       ConcurrentLinkedQueue()
     }
+
+  data class DecodedAudioPacket(
+    val data: ShortBuffer,
+    val receivedTimestamp: Long
+  )
 }
