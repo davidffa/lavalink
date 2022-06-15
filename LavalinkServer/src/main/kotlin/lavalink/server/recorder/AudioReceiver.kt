@@ -12,7 +12,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.LinkedList
-import java.util.concurrent.ConcurrentHashMap
+import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -28,7 +28,7 @@ class AudioReceiver(
   }
 
   // ssrc <-> list of 20ms pcm buffers
-  private val audioQueue = ConcurrentHashMap<Long, ConcurrentLinkedQueue<DecodedAudioPacket>>()
+  private val audioQueue = HashMap<Long, Queue<DecodedAudioPacket>>()
   private val opusDecoders = HashMap<Long, OpusDecoder>()
 
   private val mp3Encoder = Mp3Encoder(48000, 2, bitrate)
@@ -72,8 +72,10 @@ class AudioReceiver(
         for (i in 0 until BUFF_CAP / 2) {
           var sample = 0
 
-          currentFrames.forEach {
-            sample += it.data.get(i)
+          // Using conventional for loop instead of foreach prevents arraylist.iterator() calls,
+          // that were allocating too much memory on the heap
+          for (j in 0 until currentFrames.size) {
+            sample += currentFrames[j].data.get(i)
           }
 
           if (sample > Short.MAX_VALUE)
@@ -115,7 +117,6 @@ class AudioReceiver(
       .put(opus)
       .flip()
 
-    // v Huge memory allocation
     val pcmBuf = ByteBuffer.allocateDirect(BUFF_CAP)
       .order(ByteOrder.nativeOrder())
       .asShortBuffer()
