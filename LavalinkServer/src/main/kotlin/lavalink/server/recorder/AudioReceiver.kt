@@ -38,14 +38,14 @@ class AudioReceiver(
     t
   }
 
-  private val opusBuf = ByteBuffer.allocateDirect(BUFF_CAP)
-    .order(ByteOrder.nativeOrder())
   private val mp3Buf = ByteBuffer.allocateDirect(BUFF_CAP)
     .order(ByteOrder.nativeOrder())
   private val mixedAudioFrame = ByteBuffer.allocateDirect(BUFF_CAP)
     .order(ByteOrder.nativeOrder())
 
   private val outputChannel: FileChannel
+
+  private var finished = false
 
   init {
     Files.createDirectories(Paths.get("./records"))
@@ -93,6 +93,7 @@ class AudioReceiver(
   }
 
   fun close() {
+    finished = true
     mixerExecutor.shutdown()
 
     opusDecoders.values.forEach { it.close() }
@@ -111,11 +112,8 @@ class AudioReceiver(
   }
 
   override fun handleAudio(packet: AudioPacket) {
-    val opus = packet.opusAudio
-    val opusBuf = opusBuf
-      .clear()
-      .put(opus)
-      .flip()
+    if (finished) return
+    val opusBuf = packet.opusAudio
 
     val pcmBuf = ByteBuffer.allocateDirect(BUFF_CAP)
       .order(ByteOrder.nativeOrder())
