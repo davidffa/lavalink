@@ -32,4 +32,5 @@ application.yml
 VERSION.txt
 
 LavalinkNatives/lame/lame*
+records/
 .DS_Store
