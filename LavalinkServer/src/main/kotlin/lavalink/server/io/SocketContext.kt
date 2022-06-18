@@ -30,6 +30,7 @@ import io.undertow.websockets.core.WebSockets
 import io.undertow.websockets.jsr.UndertowSession
 import lavalink.server.config.ServerConfig
 import lavalink.server.player.Player
+import lavalink.server.recorder.AudioReceiver
 import moe.kyokobot.koe.KoeClient
 import moe.kyokobot.koe.KoeEventAdapter
 import moe.kyokobot.koe.MediaConnection
@@ -55,6 +56,7 @@ class SocketContext internal constructor(
 
   //guildId <-> Player
   val players = ConcurrentHashMap<String, Player>()
+  val receivers = ConcurrentHashMap<String, AudioReceiver>()
 
   @Volatile
   var sessionPaused = false
@@ -118,6 +120,7 @@ class SocketContext internal constructor(
    */
   fun destroy(guild: Long) {
     players.remove(guild.toString())?.destroy()
+    receivers.remove(guild.toString())?.close()
     koe.destroyConnection(guild)
   }
 
@@ -177,6 +180,7 @@ class SocketContext internal constructor(
     executor.shutdown()
     playerUpdateService.shutdown()
     players.values.forEach(Player::destroy)
+    receivers.values.forEach(AudioReceiver::close)
     koe.close()
   }
 

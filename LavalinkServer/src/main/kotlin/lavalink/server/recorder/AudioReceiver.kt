@@ -19,7 +19,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
 class AudioReceiver(
-  guildId: String,
+  val guildId: String,
+  val channelId: String,
   bitrate: Int
 ) : AudioReceiveHandler {
   companion object {
@@ -43,13 +44,13 @@ class AudioReceiver(
   private val mixedAudioFrame = ByteBuffer.allocateDirect(BUFF_CAP)
     .order(ByteOrder.nativeOrder())
 
-  private val outputChannel: FileChannel
+  private lateinit var outputChannel: FileChannel
 
   private var finished = false
 
-  init {
+  fun start() {
     Files.createDirectories(Paths.get("./records"))
-    outputChannel = FileChannel.open(Path("./records/record-$guildId.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+    outputChannel = FileChannel.open(Path("./records/record-$guildId-$channelId.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
 
     mixerExecutor.scheduleAtFixedRate({
       mixedAudioFrame.clear()
