@@ -188,6 +188,10 @@ class WebSocketHandlers {
       val receiver = AudioReceiver(guildId, id, bitrate)
       conn?.receiveHandler = receiver
       context.receivers[guildId] = receiver
+
+      if (conn?.gatewayConnection?.isOpen == true) {
+        receiver.start()
+      }
     }
   }
 }

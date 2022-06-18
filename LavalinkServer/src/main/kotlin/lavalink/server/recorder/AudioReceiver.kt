@@ -46,11 +46,15 @@ class AudioReceiver(
 
   private lateinit var outputChannel: FileChannel
 
+  private var started = false
   private var finished = false
 
   fun start() {
-    Files.createDirectories(Paths.get("./records"))
-    outputChannel = FileChannel.open(Path("./records/record-$guildId-$id.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+    if (started) return
+    started = true
+
+    Files.createDirectories(Paths.get("./records/$guildId"))
+    outputChannel = FileChannel.open(Path("./records/$guildId/record-$id.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
 
     mixerExecutor.scheduleAtFixedRate({
       mixedAudioFrame.clear()
