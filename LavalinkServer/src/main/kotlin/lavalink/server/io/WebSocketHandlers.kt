@@ -59,6 +59,7 @@ class WebSocketHandlers {
     val conn = context.getMediaConnection(player)
     conn.connect(VoiceServerInfo(sessionId, endpoint, token)).whenComplete {_, _ ->
       player.provideTo(conn)
+      conn.receiveHandler = receiver
       receiver?.start()
     }
   }
@@ -177,15 +178,15 @@ class WebSocketHandlers {
     val guildId = json.getString("guildId")
     val channelId = json.getString("channelId")
 
-    val conn = context.getMediaConnection(guildId) ?: return
+    val conn = context.getMediaConnection(guildId)
     val bitrate = json.optInt("bitrate", 64000)
 
-    if (conn.receiveHandler != null) {
+    if (conn?.receiveHandler != null) {
       conn.receiveHandler = null
       context.receivers.remove(guildId)?.close()
     } else {
       val receiver = AudioReceiver(guildId, channelId, bitrate)
-      conn.receiveHandler = receiver
+      conn?.receiveHandler = receiver
       context.receivers[guildId] = receiver
     }
   }
