@@ -176,7 +176,7 @@ class WebSocketHandlers {
 
   fun record(context: SocketContext, json: JSONObject) {
     val guildId = json.getString("guildId")
-    val channelId = json.getString("channelId")
+    val id = json.getString("id")
 
     val conn = context.getMediaConnection(guildId)
     val bitrate = json.optInt("bitrate", 64000)
@@ -185,7 +185,7 @@ class WebSocketHandlers {
       conn.receiveHandler = null
       context.receivers.remove(guildId)?.close()
     } else {
-      val receiver = AudioReceiver(guildId, channelId, bitrate)
+      val receiver = AudioReceiver(guildId, id, bitrate)
       conn?.receiveHandler = receiver
       context.receivers[guildId] = receiver
     }
