@@ -77,7 +77,7 @@ class RecorderRestHandler {
     return ResponseEntity(HttpStatus.OK)
   }
 
-  @DeleteMapping(value = ["/records/{guildId}/{id}"], produces = ["application/json"])
+  @DeleteMapping(value = ["/records/{guildId}/{id}"])
   fun deleteRecord(request: HttpServletRequest, @PathVariable guildId: String, @PathVariable id: String): ResponseEntity<Unit> {
     log(request)
 
