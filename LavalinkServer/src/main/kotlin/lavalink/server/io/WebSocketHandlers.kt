@@ -182,8 +182,8 @@ class WebSocketHandlers {
     val bitrate = json.optInt("bitrate", 64000)
 
     if (conn?.receiveHandler != null) {
-      conn.receiveHandler = null
       context.receivers.remove(guildId)?.close()
+      conn.receiveHandler = null
     } else {
       val receiver = AudioReceiver(guildId, id, bitrate)
       conn?.receiveHandler = receiver

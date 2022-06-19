@@ -4,12 +4,13 @@ import com.sedmelluq.discord.lavaplayer.natives.opus.OpusDecoder
 import lavalink.server.natives.mp3.Mp3Encoder
 import moe.kyokobot.koe.handler.AudioReceiveHandler
 import moe.kyokobot.koe.internal.util.AudioPacket
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.ShortBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.LinkedList
 import java.util.Queue
@@ -26,6 +27,8 @@ class AudioReceiver(
   companion object {
     const val FRAME_SIZE = 960
     const val BUFF_CAP = FRAME_SIZE * 2 * 2 // 2 channels with 960 samples each, in bytes
+
+    private val log: Logger = LoggerFactory.getLogger(AudioReceiver::class.java)
   }
 
   // ssrc <-> list of 20ms pcm buffers
@@ -44,17 +47,22 @@ class AudioReceiver(
   private val mixedAudioFrame = ByteBuffer.allocateDirect(BUFF_CAP)
     .order(ByteOrder.nativeOrder())
 
-  private lateinit var outputChannel: FileChannel
+  private val outputChannel: FileChannel
 
   private var started = false
+  @Volatile
   private var finished = false
+
+  init {
+    Files.createDirectories(Path("./records/$guildId"))
+    outputChannel = FileChannel.open(Path("./records/$guildId/record-$id.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+  }
 
   fun start() {
     if (started) return
     started = true
 
-    Files.createDirectories(Paths.get("./records/$guildId"))
-    outputChannel = FileChannel.open(Path("./records/$guildId/record-$id.mp3"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+    log.info("Setting up AudioReceiver for guild $guildId, with id: $id")
 
     mixerExecutor.scheduleAtFixedRate({
       mixedAudioFrame.clear()
@@ -99,6 +107,7 @@ class AudioReceiver(
 
   fun close() {
     finished = true
+    log.info("Shutting down AudioReceiver for guild $guildId, with id: $id")
     mixerExecutor.shutdown()
 
     opusDecoders.values.forEach { it.close() }
