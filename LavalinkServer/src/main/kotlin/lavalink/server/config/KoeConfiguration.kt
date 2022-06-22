@@ -64,7 +64,7 @@ class KoeConfiguration(val configProperties: KoeConfigProperties) {
               || os.contains("mac", true)
               || (os.contains("win", true) && arch.equals("amd64") || arch.equals("x86"))
 
-    if (nasSupported) {
+    if (nasSupported && configProperties.useNAS) {
       log.info("Enabling JDA-NAS")
 
       var bufferSize = configProperties.bufferDurationMs ?: UdpQueueFramePollerFactory.DEFAULT_BUFFER_DURATION
