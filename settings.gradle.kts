@@ -10,7 +10,7 @@ dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
       version("kotlin", "1.6.21")
-      version("koe", "b408b07")
+      version("koe", "efba3cb")
       version("spring", "2.7.0")
       version("prometheus", "0.15.0")
 
@@ -29,8 +29,9 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.77.Final:linux-x86_64")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.77.Final")
+      library("netty-epoll-x86", "io.netty", "netty-transport-native-epoll").version("4.1.78.Final:linux-x86_64")
+      library("netty-epoll-aarch64", "io.netty", "netty-transport-native-epoll").version("4.1.78.Final:linux-aarch_64")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.78.Final")
 
       library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("99d874a")
       library("lavaplayer-iprotator", "com.sedmelluq", "lavaplayer-ext-youtube-rotator").version("0.2.3")

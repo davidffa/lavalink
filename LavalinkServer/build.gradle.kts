@@ -80,8 +80,9 @@ dependencies {
     exclude("com.sedmelluq", "lavaplayer")
   }
 
-  // Transport
-  implementation(libs.netty.epoll)
+  // Native Transport
+  implementation(libs.netty.epoll.x86)
+  implementation(libs.netty.epoll.aarch64)
   implementation(libs.netty.kqueue)
 
   // Audio Player
