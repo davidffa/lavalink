@@ -189,6 +189,8 @@ class Player(
         val rate = filters?.timescale?.rate ?: 1.0f
 
         realPosition = realPosition?.plus(20 * speed * rate)
+
+        socketContext.receivers[guildId]?.handleSelfAudio(lastFrame.data.clone())
       } else {
         audioLossCounter.onLoss()
       }
