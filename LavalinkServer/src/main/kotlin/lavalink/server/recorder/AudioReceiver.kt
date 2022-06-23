@@ -48,6 +48,9 @@ class AudioReceiver(
     t.isDaemon = true
     t
   }
+
+  // Lock for processing bot's audio in order (UdpQueueFramePoller polls 2 frames at once)
+  private val botLock = Object()
   private val audioProcessorExecutor = Executors.newFixedThreadPool(2) {
     val t = Thread(it, "$guildId - Audio Processor Thread")
     t.isDaemon = true
@@ -97,9 +100,17 @@ class AudioReceiver(
         val currentFrames = LinkedList<DecodedAudioPacket>()
 
         audioQueue.forEach {
-          var currFrame = it.value.poll()
+          var currFrame: DecodedAudioPacket?
 
-          while (currFrame != null && now - currFrame.receivedTimestamp > 100) {
+          if (it.key == -1L) {
+            currFrame = it.value.peek()
+            // Don't mix the bot's audio if it hasn't been sent yet (NAS queue)
+            if (currFrame != null && currFrame.receivedTimestamp > now) return@forEach
+          }
+
+          currFrame = it.value.poll()
+
+          while (it.key != -1L && currFrame != null && now - currFrame.receivedTimestamp > 100) {
             currFrame = it.value.poll()
           }
 
@@ -153,23 +164,23 @@ class AudioReceiver(
     outputChannel.close()
   }
 
-  fun handleSelfAudio(opus: ByteArray) {
+  fun handleSelfAudio(opus: ByteArray, expectedSendTimestamp: Long) {
     if (finished || !selfAudio) return
 
-    val now = System.currentTimeMillis()
-
     audioProcessorExecutor.execute {
-      val opusBuf = ByteBuffer.allocateDirect(opus.size)
-        .order(ByteOrder.nativeOrder())
-        .put(opus)
-        .flip()
+      synchronized(botLock) {
+        val opusBuf = ByteBuffer.allocateDirect(opus.size)
+          .order(ByteOrder.nativeOrder())
+          .put(opus)
+          .flip()
 
-      val pcmBuf = ByteBuffer.allocateDirect(BUFF_CAP)
-        .order(ByteOrder.nativeOrder())
-        .asShortBuffer()
+        val pcmBuf = ByteBuffer.allocateDirect(BUFF_CAP)
+          .order(ByteOrder.nativeOrder())
+          .asShortBuffer()
 
-      getDecoder(-1L).decode(opusBuf, pcmBuf)
-      getAudioQueue(-1L).add(DecodedAudioPacket(pcmBuf, now))
+        getDecoder(-1L).decode(opusBuf, pcmBuf)
+        getAudioQueue(-1L).add(DecodedAudioPacket(pcmBuf, expectedSendTimestamp))
+      }
     }
   }
 
