@@ -176,16 +176,17 @@ class WebSocketHandlers {
 
   fun record(context: SocketContext, json: JSONObject) {
     val guildId = json.getString("guildId")
-    val id = json.getString("id")
 
     val conn = context.getMediaConnection(guildId)
-    val bitrate = json.optInt("bitrate", 64000)
-    val selfAudio = json.optBoolean("selfAudio", false)
 
     if (conn?.receiveHandler != null) {
       context.receivers.remove(guildId)?.close()
       conn.receiveHandler = null
     } else {
+      val bitrate = json.optInt("bitrate", 64000)
+      val selfAudio = json.optBoolean("selfAudio", false)
+      val id = json.getString("id")
+
       val receiver = AudioReceiver(guildId, id, bitrate, selfAudio)
       conn?.receiveHandler = receiver
       context.receivers[guildId] = receiver
