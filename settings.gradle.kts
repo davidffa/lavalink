@@ -10,7 +10,7 @@ dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
       version("kotlin", "1.6.21")
-      version("koe", "d5dc246")
+      version("koe", "36607ad")
       version("spring", "2.7.0")
       version("prometheus", "0.15.0")
 
