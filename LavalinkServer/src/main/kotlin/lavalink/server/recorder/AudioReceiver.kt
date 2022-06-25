@@ -139,6 +139,7 @@ class AudioReceiver(
         outputChannel.write(mp3Buf)
       } else {
         outputChannel.write(mp3SilenceBuf)
+        mp3SilenceBuf.rewind()
       }
     }, 0, 20, TimeUnit.MILLISECONDS)
   }
