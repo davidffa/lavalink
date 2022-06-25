@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
 class AudioReceiver(
-  private val guildId: String,
-  private val id: String,
+  val guildId: String,
+  val id: String,
   bitrate: Int,
   private val selfAudio: Boolean
 ) : AudioReceiveHandler {

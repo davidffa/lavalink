@@ -187,8 +187,16 @@ class WebSocketHandlers {
     val conn = context.getMediaConnection(guildId)
 
     if (context.receivers.containsKey(guildId)) {
-      context.receivers.remove(guildId)?.close()
+      val receiver = context.receivers.remove(guildId)!!
       conn?.receiveHandler = null
+      receiver.close()
+
+      val responseJSON = JSONObject()
+        .put("op", "recordFinished")
+        .put("guildId", receiver.guildId)
+        .put("id", receiver.id)
+
+      context.send(responseJSON)
     } else {
       val bitrate = json.optInt("bitrate", 64000)
       val selfAudio = json.optBoolean("selfAudio", false)

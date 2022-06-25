@@ -120,8 +120,16 @@ class SocketContext internal constructor(
    */
   fun destroy(guild: Long) {
     players.remove(guild.toString())?.destroy()
-    receivers.remove(guild.toString())?.close()
     koe.destroyConnection(guild)
+    val receiver = receivers.remove(guild.toString()) ?: return
+      receiver.close()
+
+    val responseJSON = JSONObject()
+      .put("op", "recordFinished")
+      .put("guildId", receiver.guildId)
+      .put("id", receiver.id)
+
+    send(responseJSON)
   }
 
   fun pause() {
