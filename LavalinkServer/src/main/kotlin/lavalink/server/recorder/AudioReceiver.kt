@@ -24,10 +24,11 @@ class AudioReceiver(
   val guildId: String,
   val id: String,
   bitrate: Int,
-  private val selfAudio: Boolean
+  private val selfAudio: Boolean,
+  private val users: Set<String>?
 ) : AudioReceiveHandler {
   companion object {
-    const val FRAME_SIZE = 960
+    const val FRAME_SIZE = 960 // (sample_rate / 1000) * frame_duration -> (48000 / 1000) * 20
     const val BUFF_CAP = FRAME_SIZE * 2 * 2 // 2 channels with 960 samples each, in bytes
     fun calcMp3UnsafeFrameSize(bitrate: Int, sampleRate: Int) = 144 * bitrate / sampleRate
     // lame.h#L701
@@ -72,6 +73,8 @@ class AudioReceiver(
   private var finished = false
 
   init {
+    log.debug("Setting up AudioReceiver for guild $guildId, with id: $id")
+
     Files.createDirectories(Path("./records/$guildId"))
     outputChannel = FileChannel.open(
       Path("./records/$guildId/record-$id.mp3"),
@@ -86,11 +89,13 @@ class AudioReceiver(
     mp3Encoder.encode(pcmSilenceBuf, FRAME_SIZE, mp3SilenceBuf)
   }
 
+  override fun users() = users
+
   fun start() {
     if (started) return
     started = true
 
-    log.info("Setting up AudioReceiver for guild $guildId, with id: $id")
+    log.info("Starting AudioReceiver for guild $guildId, with id: $id")
 
     mixerExecutor.scheduleAtFixedRate({
       if (audioQueue.isNotEmpty()) {
