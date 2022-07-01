@@ -41,7 +41,7 @@ EXPORT jint JNICALL Java_lavalink_server_natives_mp3_Mp3EncoderLibrary_encodeMon
     }
 
     short int* input = (*jni)->GetDirectBufferAddress(jni, direct_input);
-    short int* r;
+    short int* r = NULL;
     unsigned char* output = (*jni)->GetDirectBufferAddress(jni, direct_output);
 
     return lame_encode_buffer(encoder, input, r, frame_size, output, output_length);
