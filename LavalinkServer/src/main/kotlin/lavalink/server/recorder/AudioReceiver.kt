@@ -1,7 +1,6 @@
 package lavalink.server.recorder
 
 import com.sedmelluq.discord.lavaplayer.natives.opus.OpusDecoder
-import lavalink.server.natives.mp3.Mp3Encoder
 import moe.kyokobot.koe.handler.AudioReceiveHandler
 import moe.kyokobot.koe.internal.util.AudioPacket
 import org.slf4j.Logger
@@ -9,9 +8,7 @@ import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.ShortBuffer
-import java.nio.channels.FileChannel
 import java.nio.file.Files
-import java.nio.file.StandardOpenOption
 import java.util.LinkedList
 import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap
@@ -23,17 +20,15 @@ import kotlin.io.path.Path
 class AudioReceiver(
   val guildId: String,
   val id: String,
-  bitrate: Int,
   private val selfAudio: Boolean,
-  private val users: Set<String>?
+  private val users: Set<String>?,
+  encodeToMp3: Boolean,
+  private val channels: Int,
+  bitrate: Int,
 ) : AudioReceiveHandler {
   companion object {
     const val FRAME_SIZE = 960 // (sample_rate / 1000) * frame_duration -> (48000 / 1000) * 20
     const val BUFF_CAP = FRAME_SIZE * 2 * 2 // 2 channels with 960 samples each, in bytes
-    fun calcMp3UnsafeFrameSize(bitrate: Int, sampleRate: Int) = 144 * bitrate / sampleRate
-    // lame.h#L701
-    fun calcMp3SafeFrameSize(bitrate: Int, sampleRate: Int)
-      = FRAME_SIZE * (bitrate / 8) / sampleRate + 4 * 1152 * (bitrate / 8) / sampleRate + 512
 
     private val log: Logger = LoggerFactory.getLogger(AudioReceiver::class.java)
   }
@@ -41,8 +36,6 @@ class AudioReceiver(
   // ssrc <-> list of 20ms pcm buffers
   private val audioQueue = ConcurrentHashMap<Long, Queue<DecodedAudioPacket>>()
   private val opusDecoders = ConcurrentHashMap<Long, OpusDecoder>()
-
-  private val mp3Encoder = Mp3Encoder(48000, 2, bitrate)
 
   private val mixerExecutor = Executors.newSingleThreadScheduledExecutor {
     val t = Thread(it, "$guildId - Mixer Thread")
@@ -58,15 +51,10 @@ class AudioReceiver(
     t
   }
 
-
-  private val mp3SilenceBuf = ByteBuffer.allocateDirect(calcMp3UnsafeFrameSize(bitrate, 48000))
-    .order(ByteOrder.nativeOrder())
-  private val mp3Buf = ByteBuffer.allocateDirect(calcMp3SafeFrameSize(bitrate, 48000))
-    .order(ByteOrder.nativeOrder())
   private val mixedAudioFrame = ByteBuffer.allocateDirect(BUFF_CAP)
     .order(ByteOrder.nativeOrder())
 
-  private val outputChannel: FileChannel
+  private val processor: AudioProcessor
 
   private var started = false
   @Volatile
@@ -76,17 +64,14 @@ class AudioReceiver(
     log.debug("Setting up AudioReceiver for guild $guildId, with id: $id")
 
     Files.createDirectories(Path("./records/$guildId"))
-    outputChannel = FileChannel.open(
-      Path("./records/$guildId/record-$id.mp3"),
-      StandardOpenOption.CREATE,
-      StandardOpenOption.WRITE
-    )
 
-    val pcmSilenceBuf = ByteBuffer.allocateDirect(BUFF_CAP)
-      .order(ByteOrder.nativeOrder())
-      .asShortBuffer()
+    val fileName = "./records/$guildId/record-$id"
 
-    mp3Encoder.encode(pcmSilenceBuf, FRAME_SIZE, mp3SilenceBuf)
+    processor = if (encodeToMp3) {
+      Mp3AudioProcessor(48000, channels, bitrate, fileName)
+    } else {
+      PcmAudioProcessor(channels, fileName)
+    }
   }
 
   override fun users() = users
@@ -123,7 +108,12 @@ class AudioReceiver(
           if (currFrame != null) currentFrames.push(currFrame)
         }
 
-        for (i in 0 until BUFF_CAP / 2) {
+        if (currentFrames.isEmpty()) {
+          processor.process(null)
+          return@scheduleAtFixedRate
+        }
+
+        for (i in 0 until currentFrames[0].data.capacity()) {
           var sample = 0
 
           // Using conventional for loop instead of foreach prevents arraylist.iterator() calls,
@@ -140,11 +130,9 @@ class AudioReceiver(
         }
 
         mixedAudioFrame.flip()
-        mp3Encoder.encode(mixedAudioFrame.asShortBuffer(), FRAME_SIZE, mp3Buf)
-        outputChannel.write(mp3Buf)
+        processor.process(mixedAudioFrame)
       } else {
-        outputChannel.write(mp3SilenceBuf)
-        mp3SilenceBuf.rewind()
+        processor.process(null)
       }
     }, 0, 20, TimeUnit.MILLISECONDS)
   }
@@ -159,15 +147,7 @@ class AudioReceiver(
     opusDecoders.clear()
     audioQueue.clear()
 
-    // 7200 bytes recommended on lame.h#L868
-    val finalMp3Frames = ByteBuffer.allocateDirect(7200)
-      .order(ByteOrder.nativeOrder())
-
-    mp3Encoder.flush(finalMp3Frames)
-    mp3Encoder.close()
-
-    outputChannel.write(finalMp3Frames)
-    outputChannel.close()
+    processor.close()
   }
 
   fun handleSelfAudio(opus: ByteArray, expectedSendTimestamp: Long) {
@@ -185,7 +165,19 @@ class AudioReceiver(
           .asShortBuffer()
 
         getDecoder(-1L).decode(opusBuf, pcmBuf)
-        getAudioQueue(-1L).add(DecodedAudioPacket(pcmBuf, expectedSendTimestamp))
+
+        if (channels == 1) {
+          val pcmMonoBuf = ByteBuffer.allocate(BUFF_CAP / 2)
+            .asShortBuffer()
+
+          for (i in 0 until BUFF_CAP / 2 step 2) {
+            pcmMonoBuf.put(i / 2, ((pcmBuf.get(i) + pcmBuf.get(i + 1)) / 2).toShort())
+          }
+
+          getAudioQueue(-1L).add(DecodedAudioPacket(pcmMonoBuf, expectedSendTimestamp))
+        } else {
+          getAudioQueue(-1L).add(DecodedAudioPacket(pcmBuf, expectedSendTimestamp))
+        }
       }
     }
   }
@@ -200,7 +192,19 @@ class AudioReceiver(
         .asShortBuffer()
 
       getDecoder(packet.ssrc).decode(opusBuf, pcmBuf)
-      getAudioQueue(packet.ssrc).add(DecodedAudioPacket(pcmBuf, packet.receivedTimestamp))
+
+      if (channels == 1) {
+        val pcmMonoBuf = ByteBuffer.allocate(BUFF_CAP / 2)
+          .asShortBuffer()
+
+        for (i in 0 until BUFF_CAP / 2 step 2) {
+          pcmMonoBuf.put(i / 2, ((pcmBuf.get(i) + pcmBuf.get(i + 1)) / 2).toShort())
+        }
+
+        getAudioQueue(packet.ssrc).add(DecodedAudioPacket(pcmMonoBuf, packet.receivedTimestamp))
+      } else {
+        getAudioQueue(packet.ssrc).add(DecodedAudioPacket(pcmBuf, packet.receivedTimestamp))
+      }
     }
   }
 

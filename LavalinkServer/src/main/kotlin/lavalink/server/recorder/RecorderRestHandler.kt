@@ -22,7 +22,7 @@ class RecorderRestHandler {
   companion object {
     private val log = LoggerFactory.getLogger(RecorderRestHandler::class.java)
 
-    private val fileRegex = Regex("record-(.+)\\.mp3$")
+    private val fileRegex = Regex("record-(.+)\\.(?:mp3|pcm)$")
   }
 
   private fun log(request: HttpServletRequest) {
@@ -36,7 +36,11 @@ class RecorderRestHandler {
     val fileBytes = try {
       Files.readAllBytes(Path("./records/$guildId/record-$id.mp3"))
     } catch (e: Exception) {
-      null
+      try {
+        Files.readAllBytes(Path("./records/$guildId/record-$id.pcm"))
+      } catch (e: Exception) {
+        null
+      }
     } ?: return ResponseEntity(HttpStatus.NOT_FOUND)
 
     val file = ByteArrayResource(fileBytes)
@@ -83,7 +87,11 @@ class RecorderRestHandler {
 
     try {
       Files.delete(Path("./records/$guildId/record-$id.mp3"))
-    } catch (_: Exception) {}
+    } catch (_: Exception) {
+      try {
+        Files.delete(Path("./records/$guildId/record-$id.pcm"))
+      } catch (_: Exception) {}
+    }
 
     return ResponseEntity(HttpStatus.OK)
   }

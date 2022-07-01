@@ -199,11 +199,14 @@ class WebSocketHandlers {
       context.send(responseJSON)
     } else {
       val id = json.getString("id")
-      val bitrate = json.optInt("bitrate", 64000)
       val selfAudio = json.optBoolean("selfAudio", false)
       val users = json.optJSONArray("users")?.mapTo(HashSet()) { it.toString() }
 
-      val receiver = AudioReceiver(guildId, id, bitrate, selfAudio, users)
+      val bitrate = json.optInt("bitrate", 64000)
+      val channels = json.optInt("channels", 2)
+      val encodeToMp3 = json.optBoolean("encodeToMp3", true)
+
+      val receiver = AudioReceiver(guildId, id, selfAudio, users, encodeToMp3, channels, bitrate)
       conn?.receiveHandler = receiver
       context.receivers[guildId] = receiver
 
