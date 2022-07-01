@@ -15,5 +15,7 @@ object Mp3EncoderLibrary {
 
   external fun flush(instance: Long, directOutput: ByteBuffer, outputCapacity: Int): Int
 
-  external fun encode(instance: Long, directInput: ShortBuffer, frameSize: Int, directOutput: ByteBuffer, outputCapacity: Int): Int
+  external fun encodeStereo(instance: Long, directInput: ShortBuffer, frameSize: Int, directOutput: ByteBuffer, outputCapacity: Int): Int
+
+  external fun encodeMono(instance: Long, directInput: ShortBuffer, frameSize: Int, directOutput: ByteBuffer, outputCapacity: Int): Int
 }

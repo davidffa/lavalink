@@ -20,7 +20,7 @@ EXPORT jlong JNICALL Java_lavalink_server_natives_mp3_Mp3EncoderLibrary_create(J
     return (jlong) encoder;
 }
 
-EXPORT jint JNICALL Java_lavalink_server_natives_mp3_Mp3EncoderLibrary_encode(JNIEnv *jni, jobject me, jlong instance, jobject direct_input, jint frame_size, jobject direct_output, jint output_length) {
+EXPORT jint JNICALL Java_lavalink_server_natives_mp3_Mp3EncoderLibrary_encodeStereo(JNIEnv *jni, jobject me, jlong instance, jobject direct_input, jint frame_size, jobject direct_output, jint output_length) {
     lame_t encoder = (lame_t) instance;
 
     if (instance == 0) {
@@ -31,6 +31,20 @@ EXPORT jint JNICALL Java_lavalink_server_natives_mp3_Mp3EncoderLibrary_encode(JN
     unsigned char* output = (*jni)->GetDirectBufferAddress(jni, direct_output);
 
     return lame_encode_buffer_interleaved(encoder, input, frame_size, output, output_length);
+}
+
+EXPORT jint JNICALL Java_lavalink_server_natives_mp3_Mp3EncoderLibrary_encodeMono(JNIEnv *jni, jobject me, jlong instance, jobject direct_input, jint frame_size, jobject direct_output, jint output_length) {
+    lame_t encoder = (lame_t) instance;
+
+    if (instance == 0) {
+        return 0;
+    }
+
+    short int* input = (*jni)->GetDirectBufferAddress(jni, direct_input);
+    short int* r;
+    unsigned char* output = (*jni)->GetDirectBufferAddress(jni, direct_output);
+
+    return lame_encode_buffer(encoder, input, r, frame_size, output, output_length);
 }
 
 EXPORT jint JNICALL Java_lavalink_server_natives_mp3_Mp3EncoderLibrary_flush(JNIEnv *jni, jobject me, jlong instance, jobject direct_output, jint output_length) {

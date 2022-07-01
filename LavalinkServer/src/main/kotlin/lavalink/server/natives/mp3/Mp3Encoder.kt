@@ -17,14 +17,29 @@ class Mp3Encoder(
     }
   }
 
-  fun encode(directInput: ShortBuffer, frameSize: Int, directOutput: ByteBuffer): Int {
+  fun encodeStereo(directInput: ShortBuffer, frameSize: Int, directOutput: ByteBuffer): Int {
     checkNotReleased()
     if (!directInput.isDirect || !directOutput.isDirect) {
       throw IllegalArgumentException("Arguments must be direct buffers.")
     }
 
     directOutput.clear()
-    val result = Mp3EncoderLibrary.encode(instance, directInput, frameSize, directOutput, directOutput.capacity())
+    val result = Mp3EncoderLibrary.encodeStereo(instance, directInput, frameSize, directOutput, directOutput.capacity())
+
+    directOutput.position(result)
+    directOutput.flip()
+
+    return result
+  }
+
+  fun encodeMono(directInput: ShortBuffer, frameSize: Int, directOutput: ByteBuffer): Int {
+    checkNotReleased()
+    if (!directInput.isDirect || !directOutput.isDirect) {
+      throw IllegalArgumentException("Arguments must be direct buffers.")
+    }
+
+    directOutput.clear()
+    val result = Mp3EncoderLibrary.encodeMono(instance, directInput, frameSize, directOutput, directOutput.capacity())
 
     directOutput.position(result)
     directOutput.flip()
