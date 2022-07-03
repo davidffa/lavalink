@@ -72,6 +72,9 @@ class Player(
   val isPlaying: Boolean
   get() = player.playingTrack != null && !player.isPaused
 
+  val sendSpeakingEvents: Boolean
+  get() = socketContext.sendSpeakingEvents
+
   private var myFuture: ScheduledFuture<*>? = null
 
   var filters: FilterChain? = null

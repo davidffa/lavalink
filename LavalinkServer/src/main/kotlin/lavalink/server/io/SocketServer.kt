@@ -66,6 +66,7 @@ class SocketServer(
     val userId = session.handshakeHeaders.getFirst("User-Id")!!
     val resumeKey = session.handshakeHeaders.getFirst("Resume-Key")
     val clientName = session.handshakeHeaders.getFirst("Client-Name")
+    val sendSpeakingEvents = session.handshakeHeaders.getFirst("Speaking-Events")?.toBoolean() ?: false
 
     var resumable: SocketContext? = null
     if (resumeKey != null) resumable = resumableSessions.remove(resumeKey)
@@ -82,7 +83,8 @@ class SocketServer(
       serverConfig,
       session,
       this,
-      koe.newClient(userId.toLong())
+      koe.newClient(userId.toLong()),
+      sendSpeakingEvents
     )
 
     if (clientName != null) {

@@ -47,7 +47,8 @@ class SocketContext internal constructor(
   private val serverConfig: ServerConfig,
   private var session: WebSocketSession,
   private val socketServer: SocketServer,
-  private val koe: KoeClient
+  private val koe: KoeClient,
+  val sendSpeakingEvents: Boolean
 ) {
 
   companion object {
@@ -207,6 +208,42 @@ class SocketContext internal constructor(
 
     override fun gatewayReady(target: InetSocketAddress?, ssrc: Int) {
       SocketServer.sendPlayerUpdate(this@SocketContext, player)
+    }
+
+    override fun userDisconnected(id: String) {
+      if (!player.sendSpeakingEvents) return
+
+      val out = JSONObject()
+        .put("op", "speakingEvent")
+        .put("type", "disconnected")
+        .put("guildId", player.guildId)
+        .put("userId", id)
+
+      send(out)
+    }
+
+    override fun userSpeakingStart(id: String) {
+      if (!player.sendSpeakingEvents) return
+
+      val out = JSONObject()
+        .put("op", "speakingEvent")
+        .put("type", "start")
+        .put("guildId", player.guildId)
+        .put("userId", id)
+
+      send(out)
+    }
+
+    override fun userSpeakingStop(id: String) {
+      if (!player.sendSpeakingEvents) return
+
+      val out = JSONObject()
+        .put("op", "speakingEvent")
+        .put("type", "stop")
+        .put("guildId", player.guildId)
+        .put("userId", id)
+
+      send(out)
     }
   }
 }
