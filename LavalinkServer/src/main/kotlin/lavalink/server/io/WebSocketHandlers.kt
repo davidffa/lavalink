@@ -27,6 +27,7 @@ import com.sedmelluq.discord.lavaplayer.track.TrackMarker
 import lavalink.server.player.TrackEndMarkerHandler
 import lavalink.server.player.filters.configs.Band
 import lavalink.server.player.filters.FilterChain
+import lavalink.server.recorder.AudioReceiver
 import lavalink.server.util.Util
 import moe.kyokobot.koe.VoiceServerInfo
 import org.json.JSONObject
@@ -54,9 +55,19 @@ class WebSocketHandlers {
     endpoint ?: return
 
     val player = context.getPlayer(guildId)
+    val receiver = context.receivers[guildId.toString()]
     val conn = context.getMediaConnection(player)
     conn.connect(VoiceServerInfo(sessionId, endpoint, token)).whenComplete {_, _ ->
       player.provideTo(conn)
+
+      if (conn.receiveHandler != null) {
+        (conn.receiveHandler as AudioReceiver).start()
+      }
+
+      if (receiver != null && conn.receiveHandler == null) {
+        conn.receiveHandler = receiver
+        receiver.start()
+      }
     }
   }
 
@@ -168,5 +179,40 @@ class WebSocketHandlers {
     }
 
     context.send(payload)
+  }
+
+  fun record(context: SocketContext, json: JSONObject) {
+    val guildId = json.getString("guildId")
+
+    val conn = context.getMediaConnection(guildId)
+
+    if (context.receivers.containsKey(guildId)) {
+      val receiver = context.receivers.remove(guildId)!!
+      conn?.receiveHandler = null
+      receiver.close()
+
+      val responseJSON = JSONObject()
+        .put("op", "recordFinished")
+        .put("guildId", receiver.guildId)
+        .put("id", receiver.id)
+
+      context.send(responseJSON)
+    } else {
+      val id = json.getString("id")
+      val selfAudio = json.optBoolean("selfAudio", false)
+      val users = json.optJSONArray("users")?.mapTo(HashSet()) { it.toString() }
+
+      val bitrate = json.optInt("bitrate", 64000)
+      val channels = json.optInt("channels", 2)
+      val encodeToMp3 = json.optBoolean("encodeToMp3", true)
+
+      val receiver = AudioReceiver(guildId, id, selfAudio, users, encodeToMp3, channels, bitrate)
+      conn?.receiveHandler = receiver
+      context.receivers[guildId] = receiver
+
+      if (conn?.gatewayConnection?.isOpen == true) {
+        receiver.start()
+      }
+    }
   }
 }

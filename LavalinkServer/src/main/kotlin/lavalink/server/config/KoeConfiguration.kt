@@ -46,6 +46,9 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class KoeConfiguration(val configProperties: KoeConfigProperties) {
+  companion object {
+    var udpQueueBufferDuration: Int? = null
+  }
 
   private val log: Logger = LoggerFactory.getLogger(KoeConfiguration::class.java)
 
@@ -65,15 +68,20 @@ class KoeConfiguration(val configProperties: KoeConfigProperties) {
               || (os.contains("win", true) && arch.equals("amd64") || arch.equals("x86"))
 
     if (nasSupported) {
-      log.info("Enabling JDA-NAS")
+      if (configProperties.useNAS) {
+        log.info("Enabling JDA-NAS")
 
-      var bufferSize = configProperties.bufferDurationMs ?: UdpQueueFramePollerFactory.DEFAULT_BUFFER_DURATION
-      if (bufferSize <= 0) {
-        log.warn("Buffer size of ${bufferSize}ms is illegal. Defaulting to ${UdpQueueFramePollerFactory.DEFAULT_BUFFER_DURATION}")
-        bufferSize = UdpQueueFramePollerFactory.DEFAULT_BUFFER_DURATION
+        var bufferSize = configProperties.bufferDurationMs ?: UdpQueueFramePollerFactory.DEFAULT_BUFFER_DURATION
+        if (bufferSize <= 60) {
+          log.warn("Buffer size of ${bufferSize}ms is illegal. Defaulting to ${UdpQueueFramePollerFactory.DEFAULT_BUFFER_DURATION}")
+          bufferSize = UdpQueueFramePollerFactory.DEFAULT_BUFFER_DURATION
+        }
+
+        udpQueueBufferDuration = bufferSize
+        setFramePollerFactory(UdpQueueFramePollerFactory(bufferSize, Runtime.getRuntime().availableProcessors()))
+      } else {
+        log.warn("Native audio sending disabled, GC pauses may cause your bot to stutter during playback.")
       }
-
-      setFramePollerFactory(UdpQueueFramePollerFactory(bufferSize, Runtime.getRuntime().availableProcessors()))
     } else {
       log.warn("This system and architecture appears to not support native audio sending! "
         + "GC pauses may cause your bot to stutter during playback.")

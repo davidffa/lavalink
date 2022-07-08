@@ -31,6 +31,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame
 import io.netty.buffer.ByteBuf
+import lavalink.server.config.KoeConfiguration
 import lavalink.server.config.ServerConfig
 import lavalink.server.io.SocketContext
 import lavalink.server.io.SocketServer
@@ -47,7 +48,7 @@ class Player(
   val socketContext: SocketContext,
   val guildId: String,
   audioPlayerManager: AudioPlayerManager,
-  private val serverConfig: ServerConfig
+  private val serverConfig: ServerConfig,
 ) : AudioEventAdapter() {
   private val player = audioPlayerManager.createPlayer()
   val audioLossCounter = AudioLossCounter()
@@ -70,6 +71,9 @@ class Player(
    */
   val isPlaying: Boolean
   get() = player.playingTrack != null && !player.isPaused
+
+  val sendSpeakingEvents: Boolean
+  get() = socketContext.sendSpeakingEvents
 
   private var myFuture: ScheduledFuture<*>? = null
 
@@ -189,6 +193,10 @@ class Player(
         val rate = filters?.timescale?.rate ?: 1.0f
 
         realPosition = realPosition?.plus(20 * speed * rate)
+
+
+        socketContext.receivers[guildId]?.handleSelfAudio(lastFrame.data.clone(),
+          System.currentTimeMillis() + (KoeConfiguration.udpQueueBufferDuration ?: 0))
       } else {
         audioLossCounter.onLoss()
       }

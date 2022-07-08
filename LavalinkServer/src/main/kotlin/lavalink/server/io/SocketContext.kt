@@ -30,6 +30,7 @@ import io.undertow.websockets.core.WebSockets
 import io.undertow.websockets.jsr.UndertowSession
 import lavalink.server.config.ServerConfig
 import lavalink.server.player.Player
+import lavalink.server.recorder.AudioReceiver
 import moe.kyokobot.koe.KoeClient
 import moe.kyokobot.koe.KoeEventAdapter
 import moe.kyokobot.koe.MediaConnection
@@ -46,7 +47,8 @@ class SocketContext internal constructor(
   private val serverConfig: ServerConfig,
   private var session: WebSocketSession,
   private val socketServer: SocketServer,
-  private val koe: KoeClient
+  private val koe: KoeClient,
+  val sendSpeakingEvents: Boolean
 ) {
 
   companion object {
@@ -55,6 +57,7 @@ class SocketContext internal constructor(
 
   //guildId <-> Player
   val players = ConcurrentHashMap<String, Player>()
+  val receivers = ConcurrentHashMap<String, AudioReceiver>()
 
   @Volatile
   var sessionPaused = false
@@ -95,7 +98,7 @@ class SocketContext internal constructor(
     }
 
   /**
-   * Gets or creates a voice connection
+   * Gets or creates a media connection
    */
   fun getMediaConnection(player: Player): MediaConnection {
     val guildId = player.guildId.toLong()
@@ -109,11 +112,25 @@ class SocketContext internal constructor(
   }
 
   /**
+   * Gets a media connection
+   */
+  fun getMediaConnection(guildId: String) = koe.getConnection(guildId.toLong())
+
+  /**
    * Disposes of a voice connection
    */
   fun destroy(guild: Long) {
     players.remove(guild.toString())?.destroy()
     koe.destroyConnection(guild)
+    val receiver = receivers.remove(guild.toString()) ?: return
+      receiver.close()
+
+    val responseJSON = JSONObject()
+      .put("op", "recordFinished")
+      .put("guildId", receiver.guildId)
+      .put("id", receiver.id)
+
+    send(responseJSON)
   }
 
   fun pause() {
@@ -172,6 +189,7 @@ class SocketContext internal constructor(
     executor.shutdown()
     playerUpdateService.shutdown()
     players.values.forEach(Player::destroy)
+    receivers.values.forEach(AudioReceiver::close)
     koe.close()
   }
 
@@ -190,6 +208,42 @@ class SocketContext internal constructor(
 
     override fun gatewayReady(target: InetSocketAddress?, ssrc: Int) {
       SocketServer.sendPlayerUpdate(this@SocketContext, player)
+    }
+
+    override fun userDisconnected(id: String) {
+      if (!player.sendSpeakingEvents) return
+
+      val out = JSONObject()
+        .put("op", "speakingEvent")
+        .put("type", "disconnected")
+        .put("guildId", player.guildId)
+        .put("userId", id)
+
+      send(out)
+    }
+
+    override fun userSpeakingStart(id: String) {
+      if (!player.sendSpeakingEvents) return
+
+      val out = JSONObject()
+        .put("op", "speakingEvent")
+        .put("type", "start")
+        .put("guildId", player.guildId)
+        .put("userId", id)
+
+      send(out)
+    }
+
+    override fun userSpeakingStop(id: String) {
+      if (!player.sendSpeakingEvents) return
+
+      val out = JSONObject()
+        .put("op", "speakingEvent")
+        .put("type", "stop")
+        .put("guildId", player.guildId)
+        .put("userId", id)
+
+      send(out)
     }
   }
 }

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component
 @ConfigurationProperties(prefix = "lavalink.server.koe")
 @Component
 class KoeConfigProperties {
+  var useNAS: Boolean = true
   var useEpoll: Boolean = true
   var useKQueue: Boolean = false
   var highPacketPriority: Boolean = true

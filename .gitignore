@@ -4,6 +4,7 @@ logs/
 # Build
 target/
 build/
+dist/
 out/
 bin/
 
@@ -29,3 +30,7 @@ application.yml
 .settings
 
 VERSION.txt
+
+LavalinkNatives/lame/lame*
+records/
+.DS_Store

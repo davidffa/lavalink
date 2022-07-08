@@ -8,7 +8,8 @@ lavalink:
     playerUpdateInterval: 5 # How frequently to send player updates to clients, in seconds
     statsTaskInterval: 60 # How frequently to send the node stats to clients, in seconds
     koe:
-      useEpoll: true # Native transport for Linux x86-64
+      useNAS: true # Native Audio Sending (udp-queue)
+      useEpoll: true # Native transport for Linux x86-64 & aarch64
       useKQueue: false # Native transport for Darwin Aarch64
       highPacketPriority: true
       bufferDurationMs: 400
