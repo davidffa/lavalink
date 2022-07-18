@@ -29,11 +29,10 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll-x86", "io.netty", "netty-transport-native-epoll").version("4.1.78.Final:linux-x86_64")
-      library("netty-epoll-aarch64", "io.netty", "netty-transport-native-epoll").version("4.1.78.Final:linux-aarch_64")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.78.Final")
+      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.79.Final")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.79.Final")
 
-      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("3a7a240")
+      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("fad7298")
       library("lavaplayer-iprotator", "com.sedmelluq", "lavaplayer-ext-youtube-rotator").version("0.2.3")
 
       library("lavadsp", "com.github.davidffa", "lavadsp-fork").version("0.7.9")
