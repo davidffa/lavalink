@@ -14,7 +14,6 @@ class Mp3AudioProcessor(
   fileName: String
 ) : AudioProcessor {
   companion object {
-    fun calcUnsafeFrameSize(bitrate: Int, sampleRate: Int) = 144 * bitrate / sampleRate
     // lame.h#L701
     fun calcSafeFrameSize(bitrate: Int, sampleRate: Int)
             = AudioReceiver.FRAME_SIZE * (bitrate / 8) / sampleRate + 4 * 1152 * (bitrate / 8) / sampleRate + 512
@@ -30,34 +29,20 @@ class Mp3AudioProcessor(
 
   private val tempBuf = ByteBuffer.allocateDirect(calcSafeFrameSize(bitrate, sampleRate))
     .order(ByteOrder.nativeOrder())
-  private val silenceBuf = ByteBuffer.allocateDirect(calcUnsafeFrameSize(bitrate, sampleRate))
+  private val pcmSilenceBuf = ByteBuffer.allocateDirect(AudioReceiver.FRAME_SIZE * channels * 2)
     .order(ByteOrder.nativeOrder())
-
-  init {
-    val pcmSilenceBuf = ByteBuffer.allocateDirect(AudioReceiver.FRAME_SIZE * channels * 2)
-      .order(ByteOrder.nativeOrder())
-      .asShortBuffer()
-
-    if (channels == 1) {
-      encoder.encodeMono(pcmSilenceBuf, AudioReceiver.FRAME_SIZE, silenceBuf)
-    } else {
-      encoder.encodeStereo(pcmSilenceBuf, AudioReceiver.FRAME_SIZE, silenceBuf)
-    }
-  }
+    .asShortBuffer()
 
   override fun process(input: ByteBuffer?) {
-    if (input == null) {
-      outputChannel.write(silenceBuf)
-      silenceBuf.rewind()
-    } else {
-      if (channels == 1) {
-        encoder.encodeMono(input.asShortBuffer(), AudioReceiver.FRAME_SIZE, tempBuf)
-      } else {
-        encoder.encodeStereo(input.asShortBuffer(), AudioReceiver.FRAME_SIZE, tempBuf)
-      }
+    val inputBuf = input?.asShortBuffer() ?: pcmSilenceBuf
 
-      outputChannel.write(tempBuf)
+    if (channels == 1) {
+      encoder.encodeMono(inputBuf, AudioReceiver.FRAME_SIZE, tempBuf)
+    } else {
+      encoder.encodeStereo(inputBuf, AudioReceiver.FRAME_SIZE, tempBuf)
     }
+
+    outputChannel.write(tempBuf)
   }
 
   override fun close() {
