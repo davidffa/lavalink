@@ -137,7 +137,7 @@ tasks {
         "project.version" to project.version,
         "project.groupId" to project.group,
         "project.artifactId" to project.name,
-        "env.BUILD_NUMBER" to if (System.getenv("CI") != null) System.getenv("BUILD_NUMBER") else "Unofficial",
+        "env.BUILD_NUMBER" to "Unofficial",
         "env.BUILD_TIME" to System.currentTimeMillis().toString()
       )
 
@@ -168,8 +168,7 @@ fun versionFromTag(): String {
   }
 
   // Uncommitted changes? -> should be SNAPSHOT
-  // Also watch out for false positives in the CI build
-  val clean = grgit.status().isClean || System.getenv("CI") != null
+  val clean = grgit.status().isClean
 
   if (!clean) {
     println("Git state is dirty, setting version as snapshot")
