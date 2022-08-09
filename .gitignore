@@ -29,7 +29,6 @@ application.yml
 .classpath
 .settings
 
-VERSION.txt
 
 LavalinkNatives/lame/lame*
 records/

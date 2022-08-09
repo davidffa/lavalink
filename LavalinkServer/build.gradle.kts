@@ -181,11 +181,3 @@ fun versionFromTag(): String {
     "${grgit.head().id}-SNAPSHOT"
   }
 }
-
-//create a simple version file that we will be reading to create appropriate docker tags
-
-fun versionTxt() {
-  File("$projectDir/VERSION.txt").appendText("$version\n")
-}
-
-versionTxt()
