@@ -27,12 +27,15 @@ import com.sedmelluq.discord.lavaplayer.track.TrackMarker
 import lavalink.server.player.TrackEndMarkerHandler
 import lavalink.server.player.filters.configs.Band
 import lavalink.server.player.filters.FilterChain
+import lavalink.server.recorder.AudioFormat
 import lavalink.server.recorder.AudioReceiver
 import lavalink.server.util.Util
 import moe.kyokobot.koe.VoiceServerInfo
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.*
+import kotlin.collections.HashSet
 
 class WebSocketHandlers {
 
@@ -204,9 +207,11 @@ class WebSocketHandlers {
 
       val bitrate = json.optInt("bitrate", 64000)
       val channels = json.optInt("channels", 2)
-      val encodeToMp3 = json.optBoolean("encodeToMp3", true)
+      val format = try {
+        AudioFormat.valueOf(json.optString("format", "MP3").uppercase())
+      } catch (e: Exception) { AudioFormat.MP3 }
 
-      val receiver = AudioReceiver(guildId, id, selfAudio, users, encodeToMp3, channels, bitrate)
+      val receiver = AudioReceiver(guildId, id, selfAudio, users, format, channels, bitrate)
       conn?.receiveHandler = receiver
       context.receivers[guildId] = receiver
 

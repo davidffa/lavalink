@@ -22,7 +22,7 @@ class AudioReceiver(
   val id: String,
   private val selfAudio: Boolean,
   private val users: Set<String>?,
-  encodeToMp3: Boolean,
+  format: AudioFormat,
   private val channels: Int,
   bitrate: Int,
 ) : AudioReceiveHandler {
@@ -67,10 +67,9 @@ class AudioReceiver(
 
     val fileName = "./records/$guildId/record-$id"
 
-    processor = if (encodeToMp3) {
-      Mp3AudioProcessor(48000, channels, bitrate, fileName)
-    } else {
-      PcmAudioProcessor(channels, fileName)
+    processor = when (format) {
+      AudioFormat.MP3 ->  Mp3AudioProcessor(48000, channels, bitrate, fileName)
+      AudioFormat.PCM -> PcmAudioProcessor(channels, fileName)
     }
   }
 
