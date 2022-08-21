@@ -11,7 +11,7 @@ dependencyResolutionManagement {
     create("libs") {
       version("kotlin", "1.7.10")
       version("koe", "b04fe93")
-      version("spring", "2.7.2")
+      version("spring", "2.7.3")
       version("prometheus", "0.16.0")
 
       version("gradleGit", "2.3.2")
@@ -32,7 +32,7 @@ dependencyResolutionManagement {
       library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.79.Final")
       library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.79.Final")
 
-      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("cc41abf")
+      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("6331ea9")
       library("lavaplayer-iprotator", "com.sedmelluq", "lavaplayer-ext-youtube-rotator").version("0.2.3")
 
       library("lavadsp", "com.github.davidffa", "lavadsp-fork").version("0.7.9")
@@ -42,7 +42,7 @@ dependencyResolutionManagement {
       library("spring-undertow", "org.springframework.boot", "spring-boot-starter-undertow").versionRef("spring")
 
       library("logback", "ch.qos.logback", "logback-classic").version("1.2.11")
-      library("sentry", "io.sentry", "sentry-logback").version("6.3.0")
+      library("sentry", "io.sentry", "sentry-logback").version("6.4.0")
       library("prometheus-client", "io.prometheus", "simpleclient").versionRef("prometheus")
       library("prometheus-hotspot", "io.prometheus", "simpleclient_hotspot").versionRef("prometheus")
       library("prometheus-logback", "io.prometheus", "simpleclient_logback").versionRef("prometheus")
@@ -51,7 +51,7 @@ dependencyResolutionManagement {
       library("oshi", "com.github.oshi", "oshi-core").version("6.2.2")
 
       library("jsonorg", "org.json", "json").version("20220320")
-      library("gson", "com.google.code.gson", "gson").version("2.9.0")
+      library("gson", "com.google.code.gson", "gson").version("2.9.1")
 
       // Test libs
       library("spotbugs-annotations", "com.github.spotbugs", "spotbugs-annotations").version("4.6.0")
