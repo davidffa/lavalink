@@ -81,8 +81,14 @@ dependencies {
   }
 
   // Native Transport
-  implementation(libs.netty.epoll)
-  implementation(libs.netty.kqueue)
+  implementation(variantOf(libs.netty.epoll) {
+    classifier("linux-x86_64")
+    classifier("linux-aarch_64")
+  })
+  implementation(variantOf(libs.netty.kqueue) {
+    classifier("osx-aarch_64")
+    classifier("osx-x86_64")
+  })
 
   // Audio Player
   implementation(libs.lavaplayer.main)
