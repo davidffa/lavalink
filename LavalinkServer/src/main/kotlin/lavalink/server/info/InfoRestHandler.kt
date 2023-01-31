@@ -24,6 +24,7 @@
 package lavalink.server.info
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary
+import jakarta.servlet.http.HttpServletRequest
 import org.json.JSONObject
 import org.springframework.boot.SpringBootVersion
 import org.springframework.http.HttpStatus
@@ -31,7 +32,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import javax.servlet.http.HttpServletRequest
 
 /**
  * Created by napster on 08.03.19.

@@ -25,6 +25,7 @@ package lavalink.server.player
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import jakarta.servlet.http.HttpServletRequest
 import lavalink.server.util.Util
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,7 +34,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-import javax.servlet.http.HttpServletRequest
 import java.io.IOException
 import java.util.concurrent.CompletionStage
 

@@ -27,6 +27,7 @@ import com.sedmelluq.lava.extensions.youtuberotator.planner.AbstractRoutePlanner
 import com.sedmelluq.lava.extensions.youtuberotator.planner.NanoIpRoutePlanner
 import com.sedmelluq.lava.extensions.youtuberotator.planner.RotatingIpRoutePlanner
 import com.sedmelluq.lava.extensions.youtuberotator.planner.RotatingNanoIpRoutePlanner
+import jakarta.servlet.http.HttpServletRequest
 import org.json.JSONObject
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -38,7 +39,6 @@ import org.springframework.web.server.ResponseStatusException
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
-import javax.servlet.http.HttpServletRequest
 
 @RestController
 class RoutePlannerRestHandler(private val routePlanner: AbstractRoutePlanner?) {

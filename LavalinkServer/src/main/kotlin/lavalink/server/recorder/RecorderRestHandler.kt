@@ -1,5 +1,6 @@
 package lavalink.server.recorder
 
+import jakarta.servlet.http.HttpServletRequest
 import org.json.JSONArray
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ByteArrayResource
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import javax.servlet.http.HttpServletRequest
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
