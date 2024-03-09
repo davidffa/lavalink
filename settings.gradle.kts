@@ -9,9 +9,9 @@ project(":Lavalink-Server").projectDir = File("$rootDir/LavalinkServer")
 dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
-      version("kotlin", "1.9.0")
+      version("kotlin", "1.9.23")
       version("koe", "02932e4")
-      version("spring", "3.1.2")
+      version("spring", "3.2.3")
       version("prometheus", "0.16.0")
 
       version("gradleGit", "2.3.2")
@@ -29,28 +29,28 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.96.Final")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.96.Final")
+      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.107.Final")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.107.Final")
 
-      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("e9ce89c")
+      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("47b1db5")
       library("lavaplayer-iprotator", "com.sedmelluq", "lavaplayer-ext-youtube-rotator").version("0.2.3")
 
       library("lavadsp", "com.github.davidffa", "lavadsp-fork").version("0.7.9")
 
-      library("spring-ws", "org.springframework", "spring-websocket").version("6.0.11")
+      library("spring-ws", "org.springframework", "spring-websocket").version("6.1.4")
       library("spring-web", "org.springframework.boot", "spring-boot-starter-web").versionRef("spring")
       library("spring-undertow", "org.springframework.boot", "spring-boot-starter-undertow").versionRef("spring")
 
-      library("logback", "ch.qos.logback", "logback-classic").version("1.4.8")
-      library("sentry", "io.sentry", "sentry-logback").version("6.27.0")
+      library("logback", "ch.qos.logback", "logback-classic").version("1.5.3")
+      library("sentry", "io.sentry", "sentry-logback").version("7.6.0")
       library("prometheus-client", "io.prometheus", "simpleclient").versionRef("prometheus")
       library("prometheus-hotspot", "io.prometheus", "simpleclient_hotspot").versionRef("prometheus")
       library("prometheus-logback", "io.prometheus", "simpleclient_logback").versionRef("prometheus")
       library("prometheus-servlet", "io.prometheus", "simpleclient_servlet").versionRef("prometheus")
 
-      library("oshi", "com.github.oshi", "oshi-core").version("6.4.4")
+      library("oshi", "com.github.oshi", "oshi-core").version("6.4.13")
 
-      library("jsonorg", "org.json", "json").version("20230618")
+      library("jsonorg", "org.json", "json").version("20240303")
       library("gson", "com.google.code.gson", "gson").version("2.10.1")
 
       // Test libs
