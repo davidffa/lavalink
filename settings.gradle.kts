@@ -11,6 +11,7 @@ dependencyResolutionManagement {
     create("libs") {
       version("kotlin", "1.9.23")
       version("koe", "02932e4")
+      version("yt-asm", "1.0.7")
       version("spring", "3.2.3")
       version("prometheus", "0.16.0")
 
@@ -29,10 +30,12 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.107.Final")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.107.Final")
+      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.109.Final")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.109.Final")
 
-      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("1154e56")
+      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("474b2a1")
+      library("lavaplayer-yt", "com.github.lavalink-devs.youtube-source", "common").versionRef("yt-asm")
+      library("lavaplayer-yt-thumbnail", "com.github.lavalink-devs.youtube-source", "lldevs").versionRef("yt-asm")
       library("lavaplayer-iprotator", "com.sedmelluq", "lavaplayer-ext-youtube-rotator").version("0.2.3")
 
       library("lavadsp", "com.github.davidffa", "lavadsp-fork").version("0.7.9")
@@ -48,7 +51,7 @@ dependencyResolutionManagement {
       library("prometheus-logback", "io.prometheus", "simpleclient_logback").versionRef("prometheus")
       library("prometheus-servlet", "io.prometheus", "simpleclient_servlet").versionRef("prometheus")
 
-      library("oshi", "com.github.oshi", "oshi-core").version("6.4.13")
+      library("oshi", "com.github.oshi", "oshi-core").version("6.6.0")
 
       library("jsonorg", "org.json", "json").version("20240303")
       library("gson", "com.google.code.gson", "gson").version("2.10.1")

@@ -38,12 +38,16 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.yamusic.YandexHttpContextFilter
 import com.sedmelluq.discord.lavaplayer.source.yamusic.YandexMusicAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer
 import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotatorSetup
 import com.sedmelluq.lava.extensions.youtuberotator.planner.*
 import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv4Block
 import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv6Block
+import dev.lavalink.youtube.YoutubeAudioSourceManager
+import dev.lavalink.youtube.clients.AndroidWithThumbnail
+import dev.lavalink.youtube.clients.MusicWithThumbnail
+import dev.lavalink.youtube.clients.TvHtml5EmbeddedWithThumbnail
+import dev.lavalink.youtube.clients.WebWithThumbnail
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -73,17 +77,24 @@ class AudioPlayerConfiguration {
     if (sources.youtube) {
       val youtube = YoutubeAudioSourceManager(
         lavaplayerProps.isYoutubeSearchEnabled,
-        lavaplayerProps.youtubeConfig?.email,
-        lavaplayerProps.youtubeConfig?.password
+        MusicWithThumbnail(),
+        WebWithThumbnail(),
+        AndroidWithThumbnail(),
+        TvHtml5EmbeddedWithThumbnail()
       )
+
       if (routePlanner != null) {
         val retryLimit = lavaplayerProps.ratelimit?.retryLimit ?: -1
-        when {
-          retryLimit < 0 -> YoutubeIpRotatorSetup(routePlanner).forSource(youtube).setup()
-          retryLimit == 0 -> YoutubeIpRotatorSetup(routePlanner).forSource(youtube).withRetryLimit(Int.MAX_VALUE)
-            .setup()
-          else -> YoutubeIpRotatorSetup(routePlanner).forSource(youtube).withRetryLimit(retryLimit).setup()
+
+        val rotator = when {
+          retryLimit < 0 -> YoutubeIpRotatorSetup(routePlanner)
+          retryLimit == 0 -> YoutubeIpRotatorSetup(routePlanner).withRetryLimit(Int.MAX_VALUE)
+          else -> YoutubeIpRotatorSetup(routePlanner).withRetryLimit(retryLimit)
         }
+
+        rotator.forConfiguration(youtube.httpInterfaceManager, false)
+          .withMainDelegateFilter(null)
+          .setup()
       }
 
       val playlistLoadLimit = lavaplayerProps.youtubePlaylistLoadLimit

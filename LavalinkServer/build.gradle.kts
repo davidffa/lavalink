@@ -95,6 +95,8 @@ dependencies {
   implementation(libs.lavaplayer.iprotator) {
     exclude("com.sedmelluq", "lavaplayer")
   }
+  implementation(libs.lavaplayer.yt)
+  implementation(libs.lavaplayer.yt.thumbnail)
 
   // Filters
   implementation(libs.lavadsp) {
