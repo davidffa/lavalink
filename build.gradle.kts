@@ -27,6 +27,7 @@ allprojects {
     mavenCentral()
     jcenter()
     mavenLocal()
+    maven("https://maven.lavalink.dev/releases")
     maven("https://jitpack.io")
     maven("https://m2.dv8tion.net/releases")
   }
