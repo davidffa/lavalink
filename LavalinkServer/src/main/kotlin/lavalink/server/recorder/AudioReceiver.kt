@@ -163,7 +163,11 @@ class AudioReceiver(
           .order(ByteOrder.nativeOrder())
           .asShortBuffer()
 
-        getDecoder(-1L).decode(opusBuf, pcmBuf)
+        val ret = getDecoder(-1L).decode(opusBuf, pcmBuf)
+
+        if (ret < 0) {
+          log.error("Error decoding opus frame: $ret");
+        }
 
         if (channels == 1) {
           val pcmMonoBuf = ByteBuffer.allocate(BUFF_CAP / 2)
@@ -190,7 +194,11 @@ class AudioReceiver(
         .order(ByteOrder.nativeOrder())
         .asShortBuffer()
 
-      getDecoder(packet.ssrc).decode(opusBuf, pcmBuf)
+      val ret = getDecoder(packet.ssrc).decode(opusBuf, pcmBuf)
+
+      if (ret < 0) {
+        log.error("Error decoding opus frame: $ret");
+      }
 
       if (channels == 1) {
         val pcmMonoBuf = ByteBuffer.allocate(BUFF_CAP / 2)
