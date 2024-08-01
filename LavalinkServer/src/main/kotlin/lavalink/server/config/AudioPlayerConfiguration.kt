@@ -79,7 +79,6 @@ class AudioPlayerConfiguration {
         lavaplayerProps.isYoutubeSearchEnabled,
         MusicWithThumbnail(),
         WebWithThumbnail(),
-        AndroidWithThumbnail(),
         TvHtml5EmbeddedWithThumbnail()
       )
 
