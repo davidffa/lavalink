@@ -11,7 +11,7 @@ dependencyResolutionManagement {
     create("libs") {
       version("kotlin", "2.0.0")
       version("koe", "f2c8267")
-      version("yt-asm", "1.5.1")
+      version("yt-asm", "1.5.2")
       version("spring", "3.3.2")
       version("prometheus", "0.16.0")
 
