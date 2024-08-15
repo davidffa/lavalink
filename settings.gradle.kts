@@ -9,9 +9,9 @@ project(":Lavalink-Server").projectDir = File("$rootDir/LavalinkServer")
 dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
-      version("kotlin", "2.0.0")
+      version("kotlin", "2.0.10")
       version("koe", "f2c8267")
-      version("yt-asm", "1.5.2")
+      version("yt-asm", "1.6.0")
       version("spring", "3.3.2")
       version("prometheus", "0.16.0")
 

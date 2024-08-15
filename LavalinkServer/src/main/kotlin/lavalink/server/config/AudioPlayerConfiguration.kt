@@ -44,9 +44,9 @@ import com.sedmelluq.lava.extensions.youtuberotator.planner.*
 import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv4Block
 import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv6Block
 import dev.lavalink.youtube.YoutubeAudioSourceManager
-import dev.lavalink.youtube.clients.AndroidWithThumbnail
 import dev.lavalink.youtube.clients.MusicWithThumbnail
 import dev.lavalink.youtube.clients.TvHtml5EmbeddedWithThumbnail
+import dev.lavalink.youtube.clients.Web
 import dev.lavalink.youtube.clients.WebWithThumbnail
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -102,6 +102,12 @@ class AudioPlayerConfiguration {
       }
 
       audioPlayerManager.registerSourceManager(youtube)
+
+      val ytConfig = lavaplayerProps.youtubeConfig
+
+      if (ytConfig != null) {
+        Web.setPoTokenAndVisitorData(ytConfig.poToken, ytConfig.visitorData)
+      }
     }
 
     if (sources.soundcloud) audioPlayerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault(lavaplayerProps.isSoundcloudSearchEnabled))

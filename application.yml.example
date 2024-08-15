@@ -40,9 +40,9 @@ lavalink:
       odyseeSearchEnabled: true
       soundcloudSearchEnabled: true
       yandexMusicSearchEnabled: true
-      #youtubeConfig: (Youtube account credentials, needed to play age restricted tracks)
-        #email: ""
-        #password: ""
+      #youtubeConfig: (Bypass yt bot detection, get them here https://github.com/iv-org/youtube-trusted-session-generator)
+        #poToken: ""
+        #visitorData: ""
       # You can get your yandex oauth token here https://music-yandex-bot.ru/ used to remove the 30s limit on some tracks
       #yandexOAuthToken:
       #ratelimit:
