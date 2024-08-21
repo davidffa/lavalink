@@ -10,8 +10,8 @@ dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
       version("kotlin", "2.0.10")
-      version("koe", "f2c8267")
-      version("yt-asm", "1.6.0")
+      version("koe", "79b236c")
+      version("yt-asm", "1.7.1")
       version("spring", "3.3.2")
       version("prometheus", "0.16.0")
 
@@ -40,18 +40,18 @@ dependencyResolutionManagement {
 
       library("lavadsp", "com.github.davidffa", "lavadsp-fork").version("0.7.9")
 
-      library("spring-ws", "org.springframework", "spring-websocket").version("6.1.10")
+      library("spring-ws", "org.springframework", "spring-websocket").version("6.1.12")
       library("spring-web", "org.springframework.boot", "spring-boot-starter-web").versionRef("spring")
       library("spring-undertow", "org.springframework.boot", "spring-boot-starter-undertow").versionRef("spring")
 
       library("logback", "ch.qos.logback", "logback-classic").version("1.5.6")
-      library("sentry", "io.sentry", "sentry-logback").version("7.11.0")
+      library("sentry", "io.sentry", "sentry-logback").version("7.14.0")
       library("prometheus-client", "io.prometheus", "simpleclient").versionRef("prometheus")
       library("prometheus-hotspot", "io.prometheus", "simpleclient_hotspot").versionRef("prometheus")
       library("prometheus-logback", "io.prometheus", "simpleclient_logback").versionRef("prometheus")
       library("prometheus-servlet", "io.prometheus", "simpleclient_servlet").versionRef("prometheus")
 
-      library("oshi", "com.github.oshi", "oshi-core").version("6.6.2")
+      library("oshi", "com.github.oshi", "oshi-core").version("6.6.3")
 
       library("jsonorg", "org.json", "json").version("20240303")
       library("gson", "com.google.code.gson", "gson").version("2.11.0")
