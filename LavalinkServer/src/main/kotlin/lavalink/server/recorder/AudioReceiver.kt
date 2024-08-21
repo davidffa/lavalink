@@ -12,8 +12,8 @@ import java.nio.file.Files
 import java.util.LinkedList
 import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
+import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
@@ -163,10 +163,14 @@ class AudioReceiver(
           .order(ByteOrder.nativeOrder())
           .asShortBuffer()
 
-        val ret = getDecoder(-1L).decode(opusBuf, pcmBuf)
+        val decoder = getDecoder(-1L)
 
-        if (ret < 0) {
-          log.error("Error decoding opus frame: $ret");
+        synchronized(decoder) {
+          try {
+            decoder.decode(opusBuf, pcmBuf)
+          } catch (ex: IllegalStateException) {
+            log.error(ex.message)
+          }
         }
 
         if (channels == 1) {
@@ -194,10 +198,14 @@ class AudioReceiver(
         .order(ByteOrder.nativeOrder())
         .asShortBuffer()
 
-      val ret = getDecoder(packet.ssrc).decode(opusBuf, pcmBuf)
+      val decoder = getDecoder(packet.ssrc)
 
-      if (ret < 0) {
-        log.error("Error decoding opus frame: $ret");
+      synchronized(decoder) {
+        try {
+          decoder.decode(opusBuf, pcmBuf)
+        } catch (ex: IllegalStateException) {
+          log.error(ex.message)
+        }
       }
 
       if (channels == 1) {
@@ -222,11 +230,13 @@ class AudioReceiver(
 
   private fun getAudioQueue(ssrc: Long) =
     audioQueue.computeIfAbsent(ssrc) {
-      ConcurrentLinkedQueue()
+      PriorityBlockingQueue()
     }
 
   data class DecodedAudioPacket(
     val data: ShortBuffer,
     val receivedTimestamp: Long
-  )
+  ) : Comparable<DecodedAudioPacket> {
+    override fun compareTo(other: DecodedAudioPacket) = (receivedTimestamp - other.receivedTimestamp).toInt()
+  }
 }
