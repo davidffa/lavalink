@@ -33,7 +33,7 @@ dependencyResolutionManagement {
       library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.112.Final")
       library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.112.Final")
 
-      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("474b2a1")
+      library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("afce079")
       library("lavaplayer-yt", "dev.lavalink.youtube", "common").versionRef("yt-asm")
       library("lavaplayer-yt-thumbnail", "dev.lavalink.youtube", "v2").versionRef("yt-asm")
       library("lavaplayer-iprotator", "com.sedmelluq", "lavaplayer-ext-youtube-rotator").version("0.2.3")
