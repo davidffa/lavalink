@@ -40,9 +40,17 @@ lavalink:
       odyseeSearchEnabled: true
       soundcloudSearchEnabled: true
       yandexMusicSearchEnabled: true
-      #youtubeConfig: (Bypass yt bot detection, get them here https://github.com/iv-org/youtube-trusted-session-generator)
+      #youtubeConfig:
+        # (Bypass yt bot detection (method 1), get them here https://github.com/iv-org/youtube-trusted-session-generator)
         #poToken: ""
         #visitorData: ""
+        # (Bypass yt bot detection (method 2)
+        # First, enable oauth, by uncommenting the oauthEnabled and start the lavalink
+        # Secondly, follow the instructions in the lavalink logs and login to youtube using a burner account
+        # Finally, get the refresh token in the lavalink logs and uncomment the refreshToken line and put it there
+        # More info: https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
+        #oauthEnabled: true
+        #refreshToken: ""
       # You can get your yandex oauth token here https://music-yandex-bot.ru/ used to remove the 30s limit on some tracks
       #yandexOAuthToken:
       #ratelimit:

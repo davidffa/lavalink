@@ -82,6 +82,14 @@ class AudioPlayerConfiguration {
         TvHtml5EmbeddedWithThumbnail()
       )
 
+      lavaplayerProps.youtubeConfig?.let { ytConfig ->
+        if (ytConfig.oauthEnabled == true) {
+          youtube.useOauth2(ytConfig.refreshToken, ytConfig.refreshToken != null)
+        }
+
+        Web.setPoTokenAndVisitorData(ytConfig.poToken, ytConfig.visitorData)
+      }
+
       if (routePlanner != null) {
         val retryLimit = lavaplayerProps.ratelimit?.retryLimit ?: -1
 
@@ -102,12 +110,6 @@ class AudioPlayerConfiguration {
       }
 
       audioPlayerManager.registerSourceManager(youtube)
-
-      val ytConfig = lavaplayerProps.youtubeConfig
-
-      if (ytConfig != null) {
-        Web.setPoTokenAndVisitorData(ytConfig.poToken, ytConfig.visitorData)
-      }
     }
 
     if (sources.soundcloud) audioPlayerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault(lavaplayerProps.isSoundcloudSearchEnabled))
