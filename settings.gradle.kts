@@ -9,10 +9,10 @@ project(":Lavalink-Server").projectDir = File("$rootDir/LavalinkServer")
 dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
-      version("kotlin", "2.0.10")
+      version("kotlin", "2.0.20")
       version("koe", "79b236c")
-      version("yt-asm", "1.7.1")
-      version("spring", "3.3.2")
+      version("yt-asm", "1.7.2")
+      version("spring", "3.3.3")
       version("prometheus", "0.16.0")
 
       version("gradleGit", "2.3.2")
@@ -30,8 +30,8 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.112.Final")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.112.Final")
+      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.113.Final")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.113.Final")
 
       library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("afce079")
       library("lavaplayer-yt", "dev.lavalink.youtube", "common").versionRef("yt-asm")
