@@ -9,10 +9,10 @@ project(":Lavalink-Server").projectDir = File("$rootDir/LavalinkServer")
 dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
-      version("kotlin", "2.0.20")
+      version("kotlin", "2.1.0")
       version("koe", "79b236c")
-      version("yt-asm", "1.7.2")
-      version("spring", "3.3.3")
+      version("yt-asm", "1.11.1")
+      version("spring", "3.4.0")
       version("prometheus", "0.16.0")
 
       version("gradleGit", "2.3.2")
@@ -30,8 +30,8 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.113.Final")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.113.Final")
+      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.115.Final")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.115.Final")
 
       library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("afce079")
       library("lavaplayer-yt", "dev.lavalink.youtube", "common").versionRef("yt-asm")
@@ -40,7 +40,7 @@ dependencyResolutionManagement {
 
       library("lavadsp", "com.github.davidffa", "lavadsp-fork").version("0.7.9")
 
-      library("spring-ws", "org.springframework", "spring-websocket").version("6.1.12")
+      library("spring-ws", "org.springframework", "spring-websocket").version("6.2.0")
       library("spring-web", "org.springframework.boot", "spring-boot-starter-web").versionRef("spring")
       library("spring-undertow", "org.springframework.boot", "spring-boot-starter-undertow").versionRef("spring")
 
@@ -51,7 +51,7 @@ dependencyResolutionManagement {
       library("prometheus-logback", "io.prometheus", "simpleclient_logback").versionRef("prometheus")
       library("prometheus-servlet", "io.prometheus", "simpleclient_servlet").versionRef("prometheus")
 
-      library("oshi", "com.github.oshi", "oshi-core").version("6.6.3")
+      library("oshi", "com.github.oshi", "oshi-core").version("6.6.5")
 
       library("jsonorg", "org.json", "json").version("20240303")
       library("gson", "com.google.code.gson", "gson").version("2.11.0")
