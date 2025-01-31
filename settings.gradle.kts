@@ -9,10 +9,10 @@ project(":Lavalink-Server").projectDir = File("$rootDir/LavalinkServer")
 dependencyResolutionManagement {
   versionCatalogs {
     create("libs") {
-      version("kotlin", "2.1.0")
+      version("kotlin", "2.1.10")
       version("koe", "79b236c")
-      version("yt-asm", "1.11.1")
-      version("spring", "3.4.0")
+      version("yt-asm", "1.11.4")
+      version("spring", "3.4.2")
       version("prometheus", "0.16.0")
 
       version("gradleGit", "2.3.2")
@@ -30,8 +30,8 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.115.Final")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.115.Final")
+      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.117.Final")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.117.Final")
 
       library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("afce079")
       library("lavaplayer-yt", "dev.lavalink.youtube", "common").versionRef("yt-asm")
@@ -51,10 +51,10 @@ dependencyResolutionManagement {
       library("prometheus-logback", "io.prometheus", "simpleclient_logback").versionRef("prometheus")
       library("prometheus-servlet", "io.prometheus", "simpleclient_servlet").versionRef("prometheus")
 
-      library("oshi", "com.github.oshi", "oshi-core").version("6.6.5")
+      library("oshi", "com.github.oshi", "oshi-core").version("6.6.6")
 
-      library("jsonorg", "org.json", "json").version("20240303")
-      library("gson", "com.google.code.gson", "gson").version("2.11.0")
+      library("jsonorg", "org.json", "json").version("20250107")
+      library("gson", "com.google.code.gson", "gson").version("2.12.1")
 
       // Test libs
       library("spotbugs-annotations", "com.github.spotbugs", "spotbugs-annotations").version("4.7.3")
