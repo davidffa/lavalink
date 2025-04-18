@@ -11,8 +11,8 @@ dependencyResolutionManagement {
     create("libs") {
       version("kotlin", "2.1.10")
       version("koe", "79b236c")
-      version("yt-asm", "1.11.5")
-      version("spring", "3.4.2")
+      version("yt-asm", "1.12.0")
+      version("spring", "3.4.4")
       version("prometheus", "0.16.0")
 
       version("gradleGit", "2.3.2")
@@ -30,8 +30,8 @@ dependencyResolutionManagement {
       library("koe-udpqueue", "com.github.davidffa.koe", "ext-udpqueue").versionRef("koe")
       library("koe-core", "com.github.davidffa.koe", "core").versionRef("koe")
 
-      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.117.Final")
-      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.117.Final")
+      library("netty-epoll", "io.netty", "netty-transport-native-epoll").version("4.1.119.Final")
+      library("netty-kqueue", "io.netty", "netty-transport-native-kqueue").version("4.1.119.Final")
 
       library("lavaplayer-main", "com.github.davidffa", "lavaplayer-fork").version("afce079")
       library("lavaplayer-yt", "dev.lavalink.youtube", "common").versionRef("yt-asm")
@@ -40,7 +40,7 @@ dependencyResolutionManagement {
 
       library("lavadsp", "com.github.davidffa", "lavadsp-fork").version("0.7.9")
 
-      library("spring-ws", "org.springframework", "spring-websocket").version("6.2.0")
+      library("spring-ws", "org.springframework", "spring-websocket").version("6.2.6")
       library("spring-web", "org.springframework.boot", "spring-boot-starter-web").versionRef("spring")
       library("spring-undertow", "org.springframework.boot", "spring-boot-starter-undertow").versionRef("spring")
 
@@ -51,7 +51,7 @@ dependencyResolutionManagement {
       library("prometheus-logback", "io.prometheus", "simpleclient_logback").versionRef("prometheus")
       library("prometheus-servlet", "io.prometheus", "simpleclient_servlet").versionRef("prometheus")
 
-      library("oshi", "com.github.oshi", "oshi-core").version("6.6.6")
+      library("oshi", "com.github.oshi", "oshi-core").version("6.8.0")
 
       library("jsonorg", "org.json", "json").version("20250107")
       library("gson", "com.google.code.gson", "gson").version("2.12.1")
